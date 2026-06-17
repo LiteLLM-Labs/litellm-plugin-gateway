@@ -12,7 +12,8 @@ import { MIGRATED_PAGES, migratedHref, legacyPageHref, legacyKeyForPathname } fr
 import { PluginModeProvider, usePluginMode } from "@/contexts/PluginModeContext";
 
 function AgentControlPlaneView() {
-  const { agentPlatformUrl, agentPlatformPath, pluginKey } = usePluginMode();
+  const { agentPlatformUrl, agentPlatformPath } = usePluginMode();
+  const { accessToken } = useAuth();
 
   if (!agentPlatformUrl) {
     return (
@@ -25,8 +26,9 @@ function AgentControlPlaneView() {
     );
   }
 
-  // plugin_key from /api/plugins is the LAP master key — pass it so LAP auto-authenticates
-  const params = pluginKey ? `?token=${encodeURIComponent(pluginKey)}` : "";
+  // Pass the user's litellm virtual key — LAP validates it against litellm's /key/info.
+  // This propagates litellm's user hierarchy (role, team, budget) into the agent control plane.
+  const params = accessToken ? `?token=${encodeURIComponent(accessToken)}` : "";
   const iframeSrc = `${agentPlatformUrl}${agentPlatformPath}${params}`;
 
   return (
